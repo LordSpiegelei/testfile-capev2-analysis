@@ -1,0 +1,41 @@
+name: Build CAPEv2 Test Sample
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Create virtual environment
+      run: python -m venv venv
+
+    - name: Activate venv and install dependencies
+      run: |
+        .\venv\Scripts\activate
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build with PyInstaller
+      run: |
+        .\venv\Scripts\activate
+        pyinstaller --onefile --uac-admin --console --name CAPEv2Testsuite .\src\malware_simbox\main.py
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CAPEv2Testsuite
+        path: dist/CAPEv2Testsuite.exe
